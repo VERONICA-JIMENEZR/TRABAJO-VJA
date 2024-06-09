@@ -1,9 +1,19 @@
 import pandas as pd
-from tranfroma import data
+from transforma import data
 from datetime import datetime
 
-def calcular_RFM_segmentacion(df):
-    # Convertimos las fechas a formato datetime
+def calcular_RFM_segmentacion(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calcula la segmentación RFM y clasifica los clientes en Oro, Plata y Bronce.
+
+    Args:
+        df (pd.DataFrame): DataFrame con las columnas 'ID cliente', 'Fecha ultima compra', 'Fecha transaccion',
+                           'ID transaccion' y 'Precio final'.
+
+    Returns:
+        pd.DataFrame: DataFrame con las columnas 'Recency', 'Frequency', 'Monetary', 'R_quartile', 'F_quartile',
+                      'M_quartile', 'RFM_Segment' y 'Cliente', donde cada fila representa un cliente segmentado.
+    """
     df['Fecha ultima compra'] = pd.to_datetime(df['Fecha ultima compra'])
     df['Fecha transaccion'] = pd.to_datetime(df['Fecha transaccion'])
 
@@ -35,44 +45,38 @@ def calcular_RFM_segmentacion(df):
     # Creamos una nueva columna para la segmentación final
     rfm['RFM_Segment'] = rfm['R_quartile'].astype(str) + rfm['F_quartile'].astype(str) + rfm['M_quartile'].astype(str)
 
+    # Clasificamos los clientes en Oro, Plata y Bronce
+    rfm['Cliente'] = rfm['RFM_Segment'].apply(
+        lambda x: 'Oro' if x == 'OroOroOro' else ('Plata' if x == 'PlataPlataPlata' else 'Bronce')
+    )
+
     return rfm
 
-def contar_clientes_rfms(rfm):
-    # Contar el número de clientes en cada categoría RFM
-    clientes_oro = rfm[rfm['RFM_Segment'] == 'OroOroOro'].shape[0]
-    clientes_plata = rfm[rfm['RFM_Segment'] == 'PlataPlataPlata'].shape[0]
-    clientes_bronce = rfm[rfm['RFM_Segment'] == 'BronceBronceBronce'].shape[0]
+def guardar_clientes_segmentados(rfm: pd.DataFrame, df: pd.DataFrame) -> None:
+    """
+    Guarda los clientes segmentados en un archivo CSV y muestra nombre y cliente (la clasificación).
+
+    Args:
+        rfm (pd.DataFrame): DataFrame con la segmentación RFM.
+        df (pd.DataFrame): DataFrame original con los datos de los clientes.
+    """
+    # Obtener los nombres únicos de los clientes de cada categoría
+    nombres = df[['ID cliente', 'Nombre']].drop_duplicates().set_index('ID cliente')
+    rfm = rfm.join(nombres, on='ID cliente')
     
-    return clientes_oro, clientes_plata, clientes_bronce
+    # Guardar en un archivo CSV
+    rfm.to_csv('clientes_segmentados.csv', columns=['Nombre', 'Cliente'])
 
-def obtener_nombres_clientes_por_segmento(rfm, df, segmento):
-    # Obtener los IDs de los clientes en el segmento especificado
-    ids_clientes_segmento = rfm[rfm['RFM_Segment'] == segmento].index
+    # Mostrar el nombre y el tipo de cliente en la consola
+    print(rfm[['Nombre', 'Cliente']])
 
-    # Filtrar el DataFrame original para obtener solo los clientes del segmento
-    clientes_segmento_df = df[df['ID cliente'].isin(ids_clientes_segmento)]
+# Datos
+data = data
 
-    # Obtener los nombres únicos de los clientes del segmento
-    nombres_clientes_segmento = clientes_segmento_df['Nombre'].unique()
 
-    return nombres_clientes_segmento
-
-# Llamamos a la función con el DataFrame combinado
+# Calcular la segmentación RFM
 resultado_RFM = calcular_RFM_segmentacion(data)
 print(resultado_RFM)
 
-# Llamamos a la función para contar los clientes más importantes en cada categoría RFM
-clientes_oro, clientes_plata, clientes_bronce = contar_clientes_rfms(resultado_RFM)
-
-# Imprimimos los resultados
-print(f"El número de clientes con la secuencia RFM 'OroOroOro' es: {clientes_oro}")
-print(f"El número de clientes con la secuencia RFM 'PlataPlataPlata' es: {clientes_plata}")
-
-
-# Obtener nombres de clientes en cada segmento
-nombres_clientes_oro = obtener_nombres_clientes_por_segmento(resultado_RFM, data, 'OroOroOro')
-nombres_clientes_plata = obtener_nombres_clientes_por_segmento(resultado_RFM, data, 'PlataPlataPlata')
-
-# Imprimimos los resultados
-print(f"Los nombres de los clientes con la secuencia RFM 'OroOroOro' son: {nombres_clientes_oro}")
-print(f"Los nombres de los clientes con la secuencia RFM 'PlataPlataPlata' son: {nombres_clientes_plata}")
+# Guardar los clientes segmentados en un archivo CSV y mostrar en consola
+guardar_clientes_segmentados(resultado_RFM, data)

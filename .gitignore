@@ -1,1 +1,3 @@
-/trabajo
+*.csv
+#vamos a ignorar los pycache
+__pycache__/

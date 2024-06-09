@@ -1,7 +1,11 @@
 import pandas as pd
-from tranfroma import data
+from transforma import data
+from typing import Tuple, Any
 
-def calcular_cohorte(df):
+def calcular_cohorte(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, Any]:
+    """
+    Calcula la cohorte de clientes, los productos más consumidos y el producto más común.
+    """
     # Convertir la columna 'Fecha ultima compra' a datetime
     df['Fecha'] = pd.to_datetime(df['Fecha ultima compra'])
     df['Mes'] = df['Fecha'].dt.month
@@ -25,6 +29,10 @@ def calcular_cohorte(df):
 
 # Llamar a la función con el DataFrame combinado
 nuevos, consumidos, comun = calcular_cohorte(data)
+
+# Guardar los resultados en un archivo CSV
+resultados = pd.concat([nuevos, consumidos], axis=1)
+resultados.to_csv('resultados_cohorte.csv', index=False)
 
 # Imprimir los resultados
 print("Nuevos por Cohorte:")
