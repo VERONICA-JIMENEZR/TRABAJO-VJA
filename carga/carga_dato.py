@@ -1,7 +1,7 @@
 import conect 
 
 try:
-    clientes_df = conect.read_csv_from_s3(conect.bucket_name, 'Cliente.csv', sep=';')
+    clientes_df1 = conect.read_csv_from_s3(conect.bucket_name, 'Cliente.csv', sep=';')
     print("Archivo 'Cliente.csv' cargado correctamente.")
 except Exception as e:
     print(f"Error al cargar 'Cliente.csv': {e}")

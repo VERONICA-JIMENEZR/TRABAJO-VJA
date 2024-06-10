@@ -7,7 +7,7 @@ from typing import Union
 # Reemplaza 'my-access-key' y 'my-secret-key' con las credenciales de AWS
 s3 = boto3.client(
     's3',
-    aws_access_key_id='',  # os.environ['CONTRASENA1']
+    aws_access_key_id='',  # os.environ['COgiNTRASENA1']
     aws_secret_access_key=''  # os.environ['CONTRASENA2']
 )
 

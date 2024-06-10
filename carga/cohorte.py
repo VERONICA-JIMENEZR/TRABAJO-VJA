@@ -1,10 +1,19 @@
 import pandas as pd
-from transforma import data
+from transforma import data  # Supongo que 'data' es un DataFrame predefinido
 from typing import Tuple, Any
 
 def calcular_cohorte(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, Any]:
     """
     Calcula la cohorte de clientes, los productos más consumidos y el producto más común.
+
+    Parámetros:
+    - df (pd.DataFrame): DataFrame que contiene los datos de los clientes.
+
+    Retorna:
+    - Tuple[pd.DataFrame, pd.DataFrame, Any]: Una tupla que contiene tres elementos:
+      1. DataFrame de clientes nuevos por cohorte.
+      2. DataFrame de productos más consumidos por cohorte.
+      3. El producto más común en general.
     """
     # Convertir la columna 'Fecha ultima compra' a datetime
     df['Fecha'] = pd.to_datetime(df['Fecha ultima compra'])
@@ -31,8 +40,9 @@ def calcular_cohorte(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, Any]
 nuevos, consumidos, comun = calcular_cohorte(data)
 
 # Guardar los resultados en un archivo CSV
-resultados = pd.concat([nuevos, consumidos], axis=1)
-resultados.to_csv('resultados_cohorte.csv', index=False)
+# Solo tomamos los datos necesarios para el archivo de productos más vendidos por mes
+productos_mas_vendidos_por_mes = consumidos[['Año', 'Mes', 'Consumido']]
+productos_mas_vendidos_por_mes.to_csv('resultados_cohorte.csv', index=False)
 
 # Imprimir los resultados
 print("Nuevos por Cohorte:")

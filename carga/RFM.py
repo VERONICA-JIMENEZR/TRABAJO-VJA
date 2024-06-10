@@ -72,11 +72,7 @@ def guardar_clientes_segmentados(rfm: pd.DataFrame, df: pd.DataFrame) -> None:
 
 # Datos
 data = data
-
-
 # Calcular la segmentación RFM
 resultado_RFM = calcular_RFM_segmentacion(data)
-print(resultado_RFM)
-
-# Guardar los clientes segmentados en un archivo CSV y mostrar en consola
 guardar_clientes_segmentados(resultado_RFM, data)
+
