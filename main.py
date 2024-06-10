@@ -178,24 +178,27 @@ async def obtener_producto_mas_consumido(año: int, mes: int) -> dict:
 @app.get("/productos-más-vendidos")
 async def obtener_productos_mas_vendidos() -> dict:
     """
-    Obtener lista de productos más vendidos.
+    Obtener lista de los 15 productos más vendidos.
 
     Returns:
-        dict: Lista de productos más vendidos.
+        dict: Lista de los 15 productos más vendidos.
     """
-    return productos_mas_vendidos_df.to_dict(orient="records")
+    # Seleccionar los primeros 15 productos más vendidos
+    productos_mas_vendidos = productos_mas_vendidos_df.head(15)["Nombre producto"].tolist()
+    return {"productos_mas_vendidos": productos_mas_vendidos}
 
-
+# Función para obtener los 15 productos menos vendidos
 @app.get("/productos-menos-vendidos")
 async def obtener_productos_menos_vendidos() -> dict:
     """
-    Obtener lista de productos menos vendidos.
+    Obtener lista de los 15 productos menos vendidos.
 
     Returns:
-        dict: Lista de productos menos vendidos.
+        dict: Lista de los 15 productos menos vendidos.
     """
-    return productos_menos_vendidos_df.to_dict(orient="records")
-
+    # Seleccionar los últimos 15 productos menos vendidos
+    productos_menos_vendidos = productos_menos_vendidos_df.tail(15)["Nombre producto"].tolist()
+    return {"productos_menos_vendidos": productos_menos_vendidos}
 
 if __name__ == "__main__":
     import uvicorn
