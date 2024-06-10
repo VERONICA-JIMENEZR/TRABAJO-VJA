@@ -43,12 +43,3 @@ nuevos, consumidos, comun = calcular_cohorte(data)
 # Solo tomamos los datos necesarios para el archivo de productos más vendidos por mes
 productos_mas_vendidos_por_mes = consumidos[['Año', 'Mes', 'Consumido']]
 productos_mas_vendidos_por_mes.to_csv('resultados_cohorte.csv', index=False)
-
-# Imprimir los resultados
-print("Nuevos por Cohorte:")
-print(nuevos)
-
-print("\nProductos Más Consumidos por Cohorte:")
-print(consumidos)
-
-print("\nProducto Común:", comun)
