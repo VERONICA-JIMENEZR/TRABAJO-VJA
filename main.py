@@ -22,11 +22,13 @@ def verificar_credenciales(credentials: HTTPBasicCredentials = Depends(security)
         raise HTTPException(status_code=401, detail="Nombre de usuario o contraseña incorrectos")
     return True
 
+# Leer los datos de los archivos CSV
 clientes_df = pd.read_csv("clientes_segmentados.csv", index_col="ID cliente")
 productos_mas_vendidos_df = pd.read_csv("productos_mas_vendidos.csv")
 productos_menos_vendidos_df = pd.read_csv("productos_menos_vendidos.csv")
 resultados_cohorte_df = pd.read_csv("resultados_cohorte.csv")
 
+# Mensaje de bienvenida
 @app.get("/")
 async def obtener_mensaje() -> dict:
     """
@@ -34,6 +36,7 @@ async def obtener_mensaje() -> dict:
     """
     return {"message": "¡Bienvenido a la API de Eureka! Esta API proporciona información sobre productos más y menos vendidos, así como el producto más consumido por mes."}
 
+# Obtener clientes por segmento
 @app.get("/clientes/{segmento}")
 async def obtener_clientes(segmento: str, authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
@@ -54,7 +57,7 @@ async def obtener_clientes(segmento: str, authenticated: bool = Depends(verifica
         "porcentaje": f"{porcentaje:.2f}%"
     }
 
-# CRUD - Create
+# CRUD - Create (Agregar un nuevo cliente)
 @app.post("/clientes")
 async def agregar_cliente(nombre: str, cliente: str, authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
@@ -69,7 +72,7 @@ async def agregar_cliente(nombre: str, cliente: str, authenticated: bool = Depen
     clientes_df.to_csv("clientes_segmentados.csv")
     return {"message": "Cliente agregado exitosamente"}
 
-# CRUD - Read
+# CRUD - Read (Obtener todos los clientes segmentados)
 @app.get("/clientes")
 async def obtener_todos_los_clientes(authenticated: bool = Depends(verificar_credenciales)):
     """
@@ -77,7 +80,7 @@ async def obtener_todos_los_clientes(authenticated: bool = Depends(verificar_cre
     """
     return clientes_df.to_dict(orient="index")
 
-# CRUD - Update
+# CRUD - Update (Actualizar información de un cliente)
 @app.put("/clientes/{id_cliente}")
 async def actualizar_cliente(id_cliente: str, nombre: str, cliente: str, authenticated: bool = Depends(verificar_credenciales)):
     """
@@ -92,7 +95,7 @@ async def actualizar_cliente(id_cliente: str, nombre: str, cliente: str, authent
     clientes_df.to_csv("clientes_segmentados.csv")
     return {"message": "Cliente actualizado exitosamente"}
 
-# CRUD - Delete
+# CRUD - Delete (Eliminar un cliente)
 @app.delete("/clientes/{id_cliente}")
 async def eliminar_cliente(id_cliente: str, authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
@@ -105,6 +108,7 @@ async def eliminar_cliente(id_cliente: str, authenticated: bool = Depends(verifi
     clientes_df.to_csv("clientes_segmentados.csv")
     return {"message": "Cliente eliminado exitosamente"}
 
+# Obtener gráfica de la proporción de clientes por segmento
 @app.get("/grafica", response_class=StreamingResponse)
 async def obtener_grafica(authenticated: bool = Depends(verificar_credenciales)) -> StreamingResponse:
     """
@@ -132,6 +136,7 @@ async def obtener_grafica(authenticated: bool = Depends(verificar_credenciales))
     
     return StreamingResponse(buf, media_type="image/png")
 
+# Obtener el producto más consumido del mes
 @app.get("/producto-más-consumido")
 async def obtener_producto_mas_consumido(año: int, mes: int, authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
@@ -146,6 +151,7 @@ async def obtener_producto_mas_consumido(año: int, mes: int, authenticated: boo
 
     return {"año": año, "mes": mes, "producto_mas_consumido": producto_mas_consumido}
 
+# Obtener lista de los 15 productos más vendidos
 @app.get("/productos-más-vendidos")
 async def obtener_productos_mas_vendidos(authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
@@ -154,6 +160,7 @@ async def obtener_productos_mas_vendidos(authenticated: bool = Depends(verificar
     productos_mas_vendidos = productos_mas_vendidos_df.head(15)["Nombre producto"].tolist()
     return {"productos_mas_vendidos": productos_mas_vendidos}
 
+# Obtener lista de los 15 productos menos vendidos
 @app.get("/productos-menos-vendidos")
 async def obtener_productos_menos_vendidos(authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
