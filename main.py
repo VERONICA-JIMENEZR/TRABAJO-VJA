@@ -4,6 +4,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import pandas as pd
 import matplotlib.pyplot as plt
 from io import BytesIO
+import uuid
 
 app = FastAPI()
 
@@ -34,7 +35,7 @@ async def obtener_mensaje() -> dict:
     """
     Mensaje de bienvenida para la API de Eureka.
     """
-    return {"message": "¡Bienvenido a la API de Eureka! Esta API proporciona información sobre productos más y menos vendidos, así como el producto más consumido por mes."}
+    return {"message": "¡Bienvenido a la API de Eureka! Esta API proporciona información sobre productos más y menos vendidos, así como el producto más consumido por mes y la segmentacion de clientes"}
 
 # Obtener clientes por segmento
 @app.get("/clientes/{segmento}")
@@ -59,14 +60,15 @@ async def obtener_clientes(segmento: str, authenticated: bool = Depends(verifica
 
 # CRUD - Create (Agregar un nuevo cliente)
 @app.post("/clientes")
-async def agregar_cliente(nombre: str, cliente: str, authenticated: bool = Depends(verificar_credenciales)) -> dict:
+async def agregar_cliente(id_cliente: str, nombre: str, cliente: str, authenticated: bool = Depends(verificar_credenciales)) -> dict:
     """
     Agregar un nuevo cliente.
     """
     if cliente.lower() not in ["oro", "plata", "bronce"]:
         raise HTTPException(status_code=404, detail="Segmento no válido")
 
-    nuevos_datos = pd.DataFrame({"Nombre": [nombre], "Cliente": [cliente.capitalize()]})
+    nuevos_datos = pd.DataFrame({"ID cliente": [id_cliente], "Nombre": [nombre], "Cliente": [cliente.capitalize()]})
+    nuevos_datos.set_index("ID cliente", inplace=True)
     global clientes_df
     clientes_df = pd.concat([clientes_df, nuevos_datos])
     clientes_df.to_csv("clientes_segmentados.csv")
@@ -101,6 +103,7 @@ async def eliminar_cliente(id_cliente: str, authenticated: bool = Depends(verifi
     """
     Eliminar un cliente.
     """
+    global clientes_df
     if id_cliente not in clientes_df.index:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
 
